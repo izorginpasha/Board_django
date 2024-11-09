@@ -1,0 +1,43 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+<!-- Название у нас будет products -->
+{% block title %}
+Products
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим все товары -->
+{% block content %}
+<h1>Все новости. Общее количество {{news|length}}</h1>
+
+<hr>
+{% if news %}
+<table>
+    <tr>
+        <td> Название</td>
+
+        <td> Текст</td>
+    </tr>
+
+    {% for news in news %}
+    <tr>
+        <td>{{ news.title }}</td>
+        <td>{{ news.text}}</td>
+
+    </tr>
+    {% endfor %}
+
+</table>
+{% else %}
+<h2>Статей нет!</h2>
+{% endif %}
+{# Добавляем пагинацию на страницу #}
+
+
+{# Информация о текущей странице #}
+{{ page_obj.number }}
+
+
+<hr>
+<button> <a href="accounts/logout">Выйти</a> </button>
+{% endblock content %}
