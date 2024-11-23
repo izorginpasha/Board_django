@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+from django.contrib.messages import constants as messages
 import os
 from dotenv import dotenv_values
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,6 +46,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'board',
     'sign',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
 SITE_ID = 1
 MIDDLEWARE = [
@@ -118,6 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -131,7 +135,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -153,6 +156,23 @@ DEFAULT_FROM_EMAIL = f'{config["EMAIL_HOST_U"]}@yandex.ru'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_ALLOW_NONIMAGE_FILES = True  # Поддержка видео и других файлов
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Full',
+        'height': 200,
+        'width': 'auto',
+        'extraPlugins': ','.join(['image2', 'mediaembed', 'uploadimage', 'embed', 'youtube,embed']),
+        'allowedContent': True,  # Разрешить весь контент (если это безопасно)
+        'removePlugins': 'image',
+        'filebrowserUploadUrl': '/ckeditor/upload/',
+    },
+}
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+    messages.SUCCESS: 'success',
+}

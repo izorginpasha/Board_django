@@ -1,0 +1,43 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+{% load custom_filters %}!
+{% block content %}
+<h1>Мои объявления</h1>
+
+{% for ad in ads %}
+<div>
+    <h3>{{ ad.title }}</h3>
+    <div style="display: grid; place-items: center; height: 100vh;">
+        <!-- Применяем фильтр youtube_embed для правильного вставления iframe -->
+        {{ ad.text|media_embed|safe }}
+    </div>
+    <a href="{% url 'ads_Detail' ad.id %}">Переити к обьявлению</a>
+    <a href="{% url 'delete_ad' ad.id %}">Удалить объявление</a>
+    <a href="{% url 'abs_edit' ad.id %}">Редактировать объявление</a>
+
+    <h4>Отклики:</h4>
+    {% if ad.responses.exists %}
+    {% for response in ad.responses.all %}
+    <p>{{ response.text }} от {{ response.user.username }}</p>
+    {% if not response.accepted %}
+    <a href="{% url 'accept_response' ad.id response.id %}">Принять отклик</a>
+    {% else %}
+    <span>Отклик принят</span>
+    <a href="{% url 'accept_response_false' ad.id response.id %}">Отклонить отклик</a>
+    {% endif %}
+    {% endfor %}
+    {% else %}
+    <p>Нет откликов.</p>
+    {% endif %}
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% empty %}
+<p>У вас нет объявлений.</p>
+{% endfor %}
+{% endblock %}

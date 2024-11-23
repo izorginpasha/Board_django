@@ -1,0 +1,9 @@
+<h1>Добавить отклик к объявлению "{{ ad.title }}"</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Отправить отклик</button>
+</form>
+
+<a href="{% url 'ads_Detail' pk=ad.pk %}">Вернуться к объявлению</a>

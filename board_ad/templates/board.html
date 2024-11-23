@@ -1,6 +1,8 @@
 <!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
 {% extends 'flatpages/default.html' %}
-
+{# Импортируем модуль с нашим тегом #}
+{% load custom_tags %
+{% load static %}
 <!-- Название у нас будет products -->
 {% block title %}
 Products
@@ -8,10 +10,10 @@ Products
 
 <!-- В контенте на странице мы выводим все товары -->
 {% block content %}
-<h1>Все новости. Общее количество {{news|length}}</h1>
+<h1>Все новости. Общее количество {{ads|length}}</h1>
 
 <hr>
-{% if news %}
+{% if ads %}
 <table>
     <tr>
         <td> Название</td>
@@ -19,10 +21,10 @@ Products
         <td> Текст</td>
     </tr>
 
-    {% for news in news %}
+    {% for ads in ads %}
     <tr>
-        <td>{{ news.title }}</td>
-        <td>{{ news.text}}</td>
+        <td><a href="/{{ ads.id}}">{{ ads.title }}</a></td>
+        <td>{{ ads.text}}</td>
 
     </tr>
     {% endfor %}
@@ -33,11 +35,26 @@ Products
 {% endif %}
 {# Добавляем пагинацию на страницу #}
 
+   {# Информация о предыдущих страницах #}
+   {% if page_obj.has_previous %}
+       <a href="?page=1">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
 
-{# Информация о текущей странице #}
-{{ page_obj.number }}
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
 
-
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
 <hr>
 <button> <a href="accounts/logout">Выйти</a> </button>
 {% endblock content %}

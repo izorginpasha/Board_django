@@ -1,17 +1,12 @@
+from django.urls import reverse
 from django.db import models
 from django.contrib.auth.models import User
-from django.urls import reverse
-
-class Response(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, default=1)
-    text = models.TextField(default="Текст отсутствует")
-
-
-    def __str__(self):
-        return self.text
+from django.utils import timezone
+from ckeditor.fields import RichTextField
+from django.contrib import admin
+from ckeditor_uploader.fields import RichTextUploadingField
 
 class Ads(models.Model):
-
     CATEGORIES = [
         ('tanks', 'Танки'),
         ('healers', 'Хилы'),
@@ -25,15 +20,28 @@ class Ads(models.Model):
         ('Spell Masters','Мастера заклинаний'),
         # добавьте остальные категории здесь
     ]
+    paginate_by = 10
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, default=1)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=55)
-    text = models.TextField(default="Текст отсутствует")
+    text = RichTextUploadingField(verbose_name="Контент")  # Поддержка текста, картинок, видео
     category = models.CharField(max_length=20, choices=CATEGORIES, default='tanks')
-    response = models.ForeignKey(Response, on_delete=models.CASCADE)
+
 
     def __str__(self):
         return self.title
 
+# Теперь модель Response, которая ссылается на Ads
+class Response(models.Model):
+    ad = models.ForeignKey(
+        Ads,
+        on_delete=models.CASCADE,
+        related_name='responses',  # Позволяет использовать ad.responses
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    text = models.TextField(default="Текст отсутствует")
+    created_at = models.DateTimeField(auto_now_add=True)  # Дата и время создания отклика
+    accepted = models.BooleanField(default=False)  # Поле для принятия отклика
 
-# Create your models here.
+    def __str__(self):
+        return self.text
