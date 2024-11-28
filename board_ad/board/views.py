@@ -10,6 +10,12 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.urls import reverse
+from .forms import UserRegistrationForm
+from django.contrib.auth import logout
+from django.contrib.auth import authenticate, login
+
+
 # Create your views here.
 class AdsList(LoginRequiredMixin, ListView):
     # Указываем модель, объекты которой мы будем выводить
@@ -41,7 +47,7 @@ class AdsDetail(LoginRequiredMixin, DetailView):
 
 class AdsCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = ('board.add_ads',)
-    form_class = AdsForm  # Убедитесь, что форма правильно связана с моделью Ads
+    form_class = AdsForm
     model = Ads
     template_name = 'ads_create.html'
 
@@ -151,8 +157,15 @@ def response(request, pk):
 def user_ads(request):
     # Получаем все объявления текущего пользователя
     ads = Ads.objects.filter(user=request.user)
+    ad = request.GET.get('ad')  # Получаем id объявления из GET-запроса
+    if ad:
+        ad_id = Ads.objects.filter(id=ad, user=request.user).first()
+        responses = ad_id.responses.all() if ad_id else []
+        print(ad_id)
+    else:
+        responses = Response.objects.filter(ad__user=request.user)  # Если 'ad' не указан, получаем все отклики
 
-    return render(request, 'user_ads.html', {'ads': ads})
+    return render(request, 'user_ads.html', {'ads': ads, 'responses': responses, 'ad': ad_id if ad else None})
 
 @login_required
 def delete_ad(request, ad_id):
@@ -160,6 +173,22 @@ def delete_ad(request, ad_id):
     ad.delete()  # Удаляем объявление
     return redirect('user_ads')
 
+@login_required
+def user_ads_one(request):
+    # Получаем все объявления текущего пользователя
+    ads = Ads.objects.filter(user=request.user)
+
+
+    # # Если передан параметр 'ad', фильтруем отклики для этого объявления
+    ad = request.GET.get('ad')  # Получаем id объявления из GET-запроса
+    if ad:
+        ad_id = Ads.objects.filter(id=ad_id, user=request.user).first()
+        responses = ad_id.responses.all() if ad_id else []
+        print(ad_id)
+    else:
+        responses = Response.objects.filter(ad__user=request.user)  # Если 'ad' не указан, получаем все отклики
+
+    return render(request, 'user_ads_one.html', {'ads': ads, 'responses': responses, 'ad': ad_id if ad else None})
 
 
 
@@ -191,3 +220,51 @@ def accept_response_false(request, ad_id, response_id):
     response.accepted = False # Добавьте поле "accepted" в модель Response для этого
     response.save()
     return redirect('user_ads')
+
+def register(request):
+    if request.user.is_authenticated:  # Если пользователь уже авторизован
+        return redirect('ads')
+
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('confirm_registration')
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+
+def confirm_registration(request):
+    if request.method == 'POST':
+        code = request.POST.get('code')
+        if request.user.profile.confirmation_code == code:
+            request.user.is_confirmed = True
+            request.user.profile.confirmation_code = None  # Очистка кода после подтверждения
+            request.user.save()
+            return redirect('ads')  # Перенаправление на домашнюю страницу
+        else:
+            return render(request, 'registration/confirm_registration.html', {'error': 'Неверный код!'})
+
+    return render(request, 'registration/confirm_registration.html')
+def custom_login(request):
+    if request.user.is_authenticated:
+        return redirect('ads')  # Если пользователь уже вошел
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password,
+                            backend='django.contrib.auth.backends.ModelBackend')
+        if user is not None:
+            login(request, user)
+            return redirect('ads')
+        else:
+            messages.error(request, 'Неверное имя пользователя или пароль.')
+    return render(request, 'registration/login.html')
+
+def custom_logout(request):
+    logout(request)
+    messages.success(request, "Вы успешно вышли из системы.")
+    return redirect('custom_login')  # Перенаправление на страницу логина

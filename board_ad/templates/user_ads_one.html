@@ -1,0 +1,80 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+{% load custom_filters %}!
+{% block content %}
+<style>
+    a {
+        display: inline-block;
+        margin: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-family: Arial, sans-serif;
+        color: #333; /* Цвет текста */
+        text-decoration: none; /* Убираем подчеркивание */
+        border: 2px solid #007BFF; /* Цвет и толщина контура */
+        border-radius: 8px; /* Скругление углов */
+        background-color: #f9f9f9; /* Фоновый цвет */
+        transition: all 0.3s ease; /* Анимация при наведении */
+    }
+
+    a:hover {
+        color: white; /* Цвет текста при наведении */
+        background-color: #007BFF; /* Фоновый цвет при наведении */
+        border-color: #0056b3; /* Изменение цвета контура */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Тень при наведении */
+    }
+</style>
+
+<!-- Фильтрация откликов по объявлениям -->
+<form method="get">
+    <label for="ad">Выберите объявление:</label>
+    <select name="ad" id="ad">
+        <option value="">Все отклики</option>
+        {% for ad in ads %}
+            <option value="{{ ad.id }}" {% if request.GET.ad == ad.id|stringformat:"s" %}selected{% endif %}>{{ ad.title }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Фильтровать</button>
+</form>
+
+<h1>Мои объявления</h1>
+
+{% if ad %}
+<div>
+    <h3>{{ ad.title }}</h3>
+    <div style=" place-items: center; ">
+        <!-- Применяем фильтр youtube_embed для правильного вставления iframe -->
+        {{ ad.text|media_embed|safe }}
+    </div>
+    <a class="content" href="{% url 'ads_Detail' ad.id %}">Переити к обьявлению</a>
+    <a class="content" href="{% url 'delete_ad' ad.id %}">Удалить объявление</a>
+    <a class="content" href="{% url 'abs_edit' ad.id %}">Редактировать объявление</a>
+
+    <h4>Отклики:</h4>
+    {% if ad.responses.exists %}
+    {% for response in ad.responses.all %}
+    <p>{{ response.text }} от {{ response.user.username }}</p>
+    {% if not response.accepted %}
+    <a href="{% url 'accept_response' ad.id response.id %}">Принять отклик</a>
+    {% else %}
+    <span>Отклик принят</span>
+    <a href="{% url 'accept_response_false' ad.id response.id %}">Отклонить отклик</a>
+    {% endif %}
+    {% endfor %}
+    {% else %}
+    <p>Нет откликов.</p>
+    {% endif %}
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% else %}
+    <p>Пожалуйста, выберите объявление для просмотра.</p>
+{% endif %}
+
+
+{% endblock %}

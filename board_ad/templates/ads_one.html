@@ -1,5 +1,5 @@
 <!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
-{% extends 'flatpages/default.html' %}
+<!--{% extends 'flatpages/default.html' %}-->
 {% load custom_filters %}!
 <!-- Название у нас будет Product -->
 {% block title %}
@@ -9,9 +9,10 @@ Product
 <!-- В контенте на странице мы выводим сам товар, идентификатор которого был передан в url -->
 {% block content %}
 
+
 <h1>{{ ads.title }}</h1>
 <!-- Применяем кастомный фильтр для youtube_embed -->
-<div style="display: grid; place-items: center; height: 100vh;">
+<div style=" place-items: center">
     <!-- Применяем фильтр youtube_embed для правильного вставления iframe -->
     {{ ads.text|media_embed|safe }}
 </div>

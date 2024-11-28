@@ -1,7 +1,7 @@
 <!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
 {% extends 'flatpages/default.html' %}
 {# Импортируем модуль с нашим тегом #}
-{% load custom_tags %
+<!--{% load custom_filters %}!-->
 {% load static %}
 <!-- Название у нас будет products -->
 {% block title %}
@@ -24,7 +24,7 @@ Products
     {% for ads in ads %}
     <tr>
         <td><a href="/{{ ads.id}}">{{ ads.title }}</a></td>
-        <td>{{ ads.text}}</td>
+        <td >{{ ads.text|media_embed|safe }}</td>
 
     </tr>
     {% endfor %}
@@ -56,5 +56,5 @@ Products
        {% endif %}
    {% endif %}
 <hr>
-<button> <a href="accounts/logout">Выйти</a> </button>
+<button> <a href="{% url 'custom_logout' %}">Выйти</a> </button>
 {% endblock content %}

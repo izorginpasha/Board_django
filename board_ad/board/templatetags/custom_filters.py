@@ -1,5 +1,7 @@
 from django import template
 import re
+from bs4 import BeautifulSoup
+
 
 register = template.Library()
 
@@ -41,62 +43,52 @@ def media_embed(value):
     - Ссылки на Vimeo видео заменяются на <iframe>
     - Ссылки на Яндекс Видео заменяются на <iframe>
     - Ссылки на RuTube видео заменяются на <iframe>
-    - Остальной текст оставляем без изменений.
+    - Обрабатывает существующие <img> теги, добавляя размеры и стили.
     """
-
-    # Регулярное выражение для изображений
-    image_regex = r'(https?://(?:[a-zA-Z0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+\.(?:jpg|jpeg|png|gif|bmp|webp))'
 
     # Регулярное выражение для YouTube видео
     youtube_regex = r'(https?://(?:www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+))'
-
-    # Регулярное выражение для Vimeo видео
     vimeo_regex = r'(https?://(?:www\.)?vimeo\.com/(\d+))'
-
-    # Регулярное выражение для Яндекс Видео
     yandex_video_regex = r'(https?://yandex\.ru/video/preview/([0-9]+))'
-
-    # Регулярное выражение для RuTube видео
     rutube_video_regex = r'(https?://rutube\.ru/video/([a-zA-Z0-9_-]+))'
 
-    # Функция для замены на тег <img>
-    def replace_with_img(match):
-        image_url = match.group(0)
-        return f'<img width="560" height="315" src="{image_url}" alt="Image" />'
-
-    # Функция для замены на тег <iframe> для YouTube
     def replace_with_youtube_iframe(match):
-        video_id = match.group(2)  # Извлекаем id видео
+        video_id = match.group(2)
         return f'<iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
 
-    # Функция для замены на тег <iframe> для Vimeo
     def replace_with_vimeo_iframe(match):
-        video_id = match.group(2)  # Извлекаем id видео
+        video_id = match.group(2)
         return f'<iframe src="https://player.vimeo.com/video/{video_id}" width="560" height="315" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>'
 
-    # Функция для замены на тег <iframe> для Яндекс Видео
     def replace_with_yandex_video_iframe(match):
-        video_id = match.group(2)  # Извлекаем id видео
+        video_id = match.group(2)
         return f'<iframe width="560" height="315" src="https://yandex.ru/video/preview/{video_id}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
 
-    # Функция для замены на тег <iframe> для RuTube
     def replace_with_rutube_iframe(match):
-        video_id = match.group(2)  # Извлекаем id видео
+        video_id = match.group(2)
         return f'<iframe width="560" height="315" src="https://rutube.ru/video/{video_id}/embed/" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
 
-    # Заменяем изображения на <img>
-    value = re.sub(image_regex, replace_with_img, value)
+    # Используем BeautifulSoup для обработки существующих HTML-тегов
+    soup = BeautifulSoup(value, 'html.parser')
 
-    # Заменяем YouTube ссылки на <iframe>
-    value = re.sub(youtube_regex, replace_with_youtube_iframe, value)
+    # Обработка тегов <img>
+    for img in soup.find_all('img'):
+        img['width'] = '400'
+        img['height'] = '300'
+        img['style'] = 'object-fit: cover;'
 
-    # Заменяем Vimeo ссылки на <iframe>
-    value = re.sub(vimeo_regex, replace_with_vimeo_iframe, value)
+    for span in soup.find_all('span'):
+        text_length = len(span.get_text())
+        if text_length > 50:
+            span['style'] = 'display: block; background-color: lightblue;'
+        else:
+            span['style'] = 'display: inline-block; background-color: lightgreen;'
+    # Обработка текста и замена ссылок на видео
+    text = str(soup)
+    text = re.sub(youtube_regex, replace_with_youtube_iframe, text)
+    text = re.sub(vimeo_regex, replace_with_vimeo_iframe, text)
+    text = re.sub(yandex_video_regex, replace_with_yandex_video_iframe, text)
+    text = re.sub(rutube_video_regex, replace_with_rutube_iframe, text)
 
-    # Заменяем Яндекс Видео ссылки на <iframe>
-    value = re.sub(yandex_video_regex, replace_with_yandex_video_iframe, value)
-
-    # Заменяем RuTube ссылки на <iframe>
-    value = re.sub(rutube_video_regex, replace_with_rutube_iframe, value)
-
-    return value
+    # Возвращаем обработанный HTML
+    return text

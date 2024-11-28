@@ -1,9 +1,14 @@
 from django.contrib import admin
-
-# Register your models here.
-from django.contrib import admin
 from .models import Ads
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
+from ckeditor_uploader.fields import RichTextUploadingField
+from django.db import models
 
-@admin.register(Ads)
 class AdsAdmin(admin.ModelAdmin):
-    list_display = ('title', )
+    list_display = ('title', 'user', 'category')
+
+    formfield_overrides = {
+        RichTextUploadingField: {'widget': CKEditorUploadingWidget()},
+    }
+
+admin.site.register(Ads, AdsAdmin)

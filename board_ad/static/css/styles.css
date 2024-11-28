@@ -1,4 +1,6 @@
 @charset "UTF-8";
+@import url(../blocks/content/content.css);
+
 /*!
 * Start Bootstrap - Bare v5.0.9 (https://startbootstrap.com/template/bare)
 * Copyright 2013-2023 Start Bootstrap
@@ -10823,4 +10825,24 @@ textarea.form-control-lg {
   .d-print-none {
     display: none !important;
   }
+}
+a {
+    display: inline-block;
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    color: #333; /* Цвет текста */
+    text-decoration: none; /* Убираем подчеркивание */
+    border: 2px solid #007BFF; /* Цвет и толщина контура */
+    border-radius: 8px; /* Скругление углов */
+    background-color: #f9f9f9; /* Фоновый цвет */
+    transition: all 0.3s ease; /* Анимация при наведении */
+}
+
+a:hover {
+    color: white; /* Цвет текста при наведении */
+    background-color: #007BFF; /* Фоновый цвет при наведении */
+    border-color: #0056b3; /* Изменение цвета контура */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Тень при наведении */
 }

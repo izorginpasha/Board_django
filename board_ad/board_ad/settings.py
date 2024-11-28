@@ -80,16 +80,6 @@ TEMPLATES = [
         },
     },
 ]
-AUTHENTICATION_BACKENDS = [
-
-    # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
-
-    # `allauth` specific authentication methods, such as login by e-mail
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
 
 WSGI_APPLICATION = 'board_ad.wsgi.application'
 
@@ -120,8 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -157,22 +146,38 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
-CKEDITOR_ALLOW_NONIMAGE_FILES = True  # Поддержка видео и других файлов
-CKEDITOR_CONFIGS = {
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_5_CONFIGS = {
     'default': {
-        'toolbar': 'Full',
-        'height': 200,
-        'width': 'auto',
-        'extraPlugins': ','.join(['image2', 'mediaembed', 'uploadimage', 'embed', 'youtube,embed']),
-        'allowedContent': True,  # Разрешить весь контент (если это безопасно)
-        'removePlugins': 'image',
-        'filebrowserUploadUrl': '/ckeditor/upload/',
+        'toolbar': ['bold', 'italic', 'link', 'imageUpload'],
+        'height': 300,
+        'width': '100%',
+        'extraPlugins': ['imageUpload', 'mediaEmbed'],
     },
 }
+
+CKEDITOR_ALLOW_NONIMAGE_FILES = True  # Поддержка видео и других файлов
+
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.SUCCESS: 'success',
 }
+LOGIN_URL = 'custom_login'
+LOGIN_REDIRECT_URL = '/'  # Перенаправление после успешного входа
+LOGOUT_REDIRECT_URL = '/'  # Перенаправление после выхода
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Стандартный бекенд Django
+)
+
+# Каталог для сохранения статических файлов после collectstatic
+STATIC_URL = '/static/'  # URL для статических файлов
+
+# Если у вас есть дополнительные статические файлы, то настройте:
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Путь к вашей директории с статическими файлами
+]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"

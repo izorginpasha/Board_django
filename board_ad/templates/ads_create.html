@@ -1,20 +1,25 @@
-<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
-{% extends 'flatpages/default.html' %}
-{% load custom_filters %}!
-<!-- Название у нас будет products -->
+{% load static %}  <!-- Добавьте эту строку в начало шаблона -->
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форма с медиа контентом</title>
+</head>
+<body>
 
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Отправить">
+    </form>
 
-<!-- В контенте на странице мы выводим все товары -->
-{% block content %}
-<h1>Создать</h1>
-{# Добавляем форму, которая объединяет набор полей, которые будут отправляться в запросе #}
-<form action="" method="post">
-    {% csrf_token %}
-    {# Переменная, которую мы передали через контекст, может сгенерировать нам форму с полями #}
-    {{ form.as_p }}
-    {# Добавим кнопку отправки данных формы #}
-    <input type="submit" value="Сохранить"/>
-</form>
-
-
-{% endblock content %}
+    <!-- Подключение CKEditor -->
+    <script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+    <script>
+        // Инициализация CKEditor
+        CKEDITOR.replace('id_text');
+    </script>
+</body>
+</html>
